@@ -1,6 +1,6 @@
 This repository contains the data and code needed to reproduce the results of the papers "The Global Effects of Drought on Agriculture: A Hierarchical Bayesian Approach" (in submission)
 
-Contact: hfreedma@uci.edu
+Contact: Hayden Freedman (hfreedma@uci.edu)
 
 To generate the figures and tables presented in the paper, run `scripts/gen_paper_results.py`. This file uses the pre-built Bayesian model files and regression dataset.
 
