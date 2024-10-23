@@ -2,7 +2,7 @@ This repository contains the data and code needed to reproduce the results of th
 
 Contact: Hayden Freedman (hfreedma@uci.edu)
 
-To generate the figures and tables presented in the paper, run `scripts/gen_paper_results.py`. This file uses the pre-built Bayesian model files and regression dataset.
+To re-generate the figures and tables presented in the paper, run `scripts/gen_paper_results.py`. This file uses the pre-built Bayesian model files and regression dataset.
 
 To re-generate the main dataset for the paper, run `scripts/create_regression_datasets.py`.
 
