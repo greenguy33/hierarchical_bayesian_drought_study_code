@@ -19,14 +19,14 @@ model0 = pd.read_pickle(model0_file)
 model1 = pd.read_pickle(model1_file)
 model2 = pd.read_pickle(model2_file)
 
-plotFig1 = False
-plotFig2 = False
+plotFig1 = True
+plotFig2 = True
 plotFig3 = True
 plotFig4 = True
-plotFig5 = False
-plotSupFig1 = False
-plotSupFig2 = False
-plotSupFig3 = False
+plotFig5 = True
+plotSupFig1 = True
+plotSupFig2 = True
+plotSupFig3 = True
 
 genSupTab1 = True
 genSupTab2 = True
