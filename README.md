@@ -1,4 +1,4 @@
-This repository contains the data and code needed to reproduce the results of the papers "The Global Effects of Drought on Agriculture: A Hierarchical Bayesian Approach" (in submission)
+This repository contains the data and code needed to reproduce the results of the paper "The Global Effects of Drought on Agriculture: A Hierarchical Bayesian Approach" (in submission)
 
 Contact: Hayden Freedman (hfreedma@uci.edu)
 
