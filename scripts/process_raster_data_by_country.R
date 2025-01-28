@@ -1,4 +1,4 @@
-# setwd("econometric_model_comparison/data")
+# setwd("hierarchical_bayesian_drought_study_code/data")
 
 library("exactextractr")
 library("sf")

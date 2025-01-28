@@ -13,10 +13,16 @@ countries_in_dataset = set(tfp_regression_data_insample.country)
 years_in_dataset = set(tfp_regression_data_insample.year)
 country_fe_cols = [col for col in tfp_regression_data_insample.columns if "country_fixed_effect" in col]
 year_fe_cols = [col for col in tfp_regression_data_insample.columns if "year_fixed_effect" in col]
+
+countries_to_remove = []
 for country_fe in country_fe_cols:
     country = country_fe.split("_")[0]
     if country not in countries_in_dataset:
         tfp_regression_data_insample = tfp_regression_data_insample.drop(country_fe, axis=1)
+        countries_to_remove.append(country)
+for country in countries_to_remove:
+    country_fe_cols.remove(country+"_country_fixed_effect")
+
 for year_fe in year_fe_cols:
     year = year_fe.split("_")[0]
     if int(year) not in years_in_dataset:
@@ -73,10 +79,10 @@ with pm.Model() as pymc_model:
     
     global_country_rs_mean = pm.Normal("global_country_rs_mean",0,10)
     global_country_rs_sd = pm.HalfNormal("global_country_rs_sd",10)
-    country_rs_means = pm.Normal("country_rs_means", global_country_rs_mean, global_country_rs_sd, shape=(1,len(country_fe_vars)))
+    country_rs_means = pm.Normal("country_rs_means", global_country_rs_mean, global_country_rs_sd, shape=(1,len(country_fe_cols)))
     country_rs_sd = pm.HalfNormal("country_rs_sd", 10)
     country_rs_coefs = pm.Normal("country_rs_coefs", country_rs_means, country_rs_sd)
-    country_rs_matrix = pm.Deterministic("country_rs_matrix", pt.sum(country_rs_coefs * model_data[country_fe_vars],axis=1))
+    country_rs_matrix = pm.Deterministic("country_rs_matrix", pt.sum(country_rs_coefs * tfp_regression_data_insample[country_fe_cols],axis=1))
 
     drought_terms = pm.Deterministic("drought_terms", country_rs_matrix * model_data_first_fe_removed["drought"])
 
