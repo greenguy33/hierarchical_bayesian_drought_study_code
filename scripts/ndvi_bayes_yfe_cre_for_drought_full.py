@@ -23,6 +23,8 @@ for country_fe in country_fe_cols:
 for country in countries_to_remove:
     country_fe_cols.remove(country+"_country_fixed_effect")
 
+print(len(country_fe_cols))
+
 for year_fe in year_fe_cols:
     year = year_fe.split("_")[0]
     if int(year) not in years_in_dataset:
@@ -108,7 +110,7 @@ with open ('output/models/bayes_models/ndvi_bayes_yfe_cre_for_drought_full_10k.p
         "prior":prior,
         "trace":trace,
         "posterior":posterior,
-        "var_list":list(model_data.columns),
+        "var_list":country_fe_cols,
         "model_spec":model_spec
     },buff)
 

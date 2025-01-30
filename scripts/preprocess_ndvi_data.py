@@ -1,13 +1,13 @@
 import pandas as pd
 import os
 import numpy as np
-import country_converter as cc
+from countrycode import countrycode as cc
 
-directory = "../data/PKU_GIMMS_NDVI_AVHRR_MODIS/extracted/"
+directory = "data/PKU_GIMMS_NDVI_AVHRR_MODIS/extracted/"
 ndvi_files = os.listdir(directory)
 
 green_months = {}
-green_month_data = pd.read_csv("../data/peak_bottom_ndvi_month_country.csv")
+green_month_data = pd.read_csv("data/peak_bottom_ndvi_month_country.csv")
 for row in green_month_data.itertuples():
     peak = row[5]
     season = [i for i in range(peak-2,peak+3)]
@@ -20,7 +20,7 @@ for row in green_month_data.itertuples():
 
 code_conversion = {}
 for country in set(pd.read_csv(directory + "vegetation_coverage.19820101.csv")["country"]):
-    code_conversion[country] = cc.convert(names=[country], to="ISO3", not_found=None)
+    code_conversion[country] = cc([country], origin="fips", destination="iso3c")[0]
 
 # drop some iso2 codes that map to the same iso3 code as another iso2 code
 codes_to_drop = ["UK"]
@@ -47,4 +47,4 @@ for year in range(1982, 2023):
     yearly_mean_data["ndvi"] = list(country_means.values())
     yearly_mean_dataframes.append(yearly_mean_data)
 
-pd.concat(yearly_mean_dataframes).replace(0,np.NaN).sort_values(["country","year"]).to_csv("../data/PKU_GIMMS_NDVI_AVHRR_MODIS/pku_data_aggregated.csv")
+pd.concat(yearly_mean_dataframes).replace(0,np.NaN).sort_values(["country","year"]).to_csv("data/PKU_GIMMS_NDVI_AVHRR_MODIS/pku_data_aggregated.csv")

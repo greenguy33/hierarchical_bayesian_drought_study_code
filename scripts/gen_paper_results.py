@@ -30,6 +30,7 @@ plotSupFig3 = True
 
 genSupTab1 = True
 genSupTab2 = True
+genSupTab3 = True
 
 # add total droughts by country and region to dataset
 land_area_data = pd.read_csv("data/land-area-km.csv")
@@ -612,3 +613,25 @@ if genSupTab2:
     df_tab2["Historical \% TFP Change from Drought Mean"] = list(map(lambda x : np.mean(model_data["percent_loss_by_region"][x]), df_tab2["Region Name"]))
     df_tab2["Historical \% TFP Change from Drought SD"] = list(map(lambda x : np.std(model_data["percent_loss_by_region"][x]), df_tab2["Region Name"]))
     df_tab2.to_latex(buf="tables/suptab2.ltx", index=False, float_format="%.3f")
+
+# generate supplementary table 3
+
+if genSupTab3:
+
+    ndvi_model = pd.read_pickle("output/models/bayes_models/ndvi_bayes_yfe_cre_for_drought_full/ndvi_bayes_yfe_cre_for_drought_full_10k_only_country_coefs.pkl")
+    ndvi_data = pd.read_csv("data/regression/ndvi_regression_data.csv").dropna().reset_index(drop=True)
+
+    # unscale ndvi country coefficients
+    scaled_vars = {}
+    unscaled_vars = {}
+    for country_index, var in enumerate(ndvi_model["var_list"]):
+        scaled_vars[var] = ndvi_model["posterior"][:,:,:,country_index].data.flatten()
+    for var, samples in scaled_vars.items():
+        unscaled_vars[var] = np.array(samples) * np.std(ndvi_data.fd_ln_ndvi)
+
+    df_tab3 = pd.DataFrame()
+    df_tab3["ISO3 Country Code"] = sorted(set(data.country))
+    for model in model_impacts:
+        df_tab3[f"{model.capitalize()} Drought Coef. Means"] = list(map(lambda x : np.mean(model_impacts[model]["country_coefficients"][x+"_country_fixed_effect"]), df_tab3["ISO3 Country Code"]))
+    df_tab3["Model3 Drought Coef. Means"] = list(map(lambda x : np.mean(unscaled_vars[x+"_country_fixed_effect"] if x+"_country_fixed_effect" in unscaled_vars else np.NaN), df_tab3["ISO3 Country Code"]))
+    df_tab3.to_latex(buf="tables/suptab3.ltx", index=False, float_format="%.3f", longtable=True)
