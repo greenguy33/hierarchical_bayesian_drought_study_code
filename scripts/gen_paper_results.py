@@ -11,26 +11,26 @@ import mapclassify
 
 data = pd.read_csv("data/regression/tfp_regression_data.csv").dropna().reset_index(drop=True)
 
-model0_file = 'output/models/bayes_models/tfp_bayes_yfe_cre_for_drought_full/tfp_bayes_yfe_cre_for_drought_withheld_10k_no_temp_only_country_coefs.pkl'
-model1_file = 'output/models/bayes_models/tfp_bayes_yfe_cre_for_drought_full/tfp_bayes_yfe_cre_for_drought_full_10k_temp_only_country_coefs.pkl'
-model2_file = 'output/models/bayes_models/tfp_bayes_yfe_cre_for_drought_full/tfp_bayes_yfe_cre_for_drought_full_10k_temp_and_precip_only_country_coefs.pkl'
+model0_file = 'output/models/bayes_models/tfp_bayes_yfe_cre_for_drought_full/tfp_bayes_yfe_cre_for_drought_full_with_intercept_no_weather_vars_multiyear_drought_only_country_coefs.pkl'
+model1_file = 'output/models/bayes_models/tfp_bayes_yfe_cre_for_drought_full/tfp_bayes_yfe_cre_for_drought_full_with_intercept_temp_multiyear_drought_only_country_coefs.pkl'
+model2_file = 'output/models/bayes_models/tfp_bayes_yfe_cre_for_drought_full/tfp_bayes_yfe_cre_for_drought_full_with_intercept_temp_and_precip_multiyear_drought_only_country_coefs.pkl'
 
 model0 = pd.read_pickle(model0_file)
 model1 = pd.read_pickle(model1_file)
 model2 = pd.read_pickle(model2_file)
 
-plotFig1 = True
-plotFig2 = True
-plotFig3 = True
-plotFig4 = True
-plotFig5 = True
-plotSupFig1 = True
-plotSupFig2 = True
+plotFig1 = False
+plotFig2 = False
+plotFig3 = False
+plotFig4 = False
+plotFig5 = False
+plotSupFig1 = False
+plotSupFig2 = False
 plotSupFig3 = True
 
-genSupTab1 = True
-genSupTab2 = True
-genSupTab3 = True
+genSupTab1 = False
+genSupTab2 = False
+genSupTab3 = False
 
 # add total droughts by country and region to dataset
 land_area_data = pd.read_csv("data/land-area-km.csv")
@@ -138,7 +138,7 @@ for model_index, model in enumerate([model0, model1, model2]):
     # compute probability that drought has decreased TFP for each region
     region_percentiles = {}
     for region in set(data.region23):
-        region_percentiles[region] = len([val for val in percent_loss_by_region[region] if val < 0])/20000
+        region_percentiles[region] = len([val for val in percent_loss_by_region[region] if val < 0])/4000
 
     # compute global % impact
     global_effect = [0]*len(unscaled_vars["AFG_country_fixed_effect"])
@@ -352,7 +352,7 @@ if plotFig3:
     barplot = axs["Top"].barh(list(range(0,20)), barcounts, color=region_colors)
     barcolors = ["white","white","white","white","white","black","black","black","black","black","black","black","black","black","black","black","black","black","black","white"]
     barlabels = axs["Top"].bar_label(barplot, list(sorted_region_percentiles.keys()), label_type = "center")
-    barpaddings = list(reversed([62,-13,-89,-41,-127,-100,-107,-122,-125,-121,-154,-139,-147,-163,-179,-182,-200,-199,-212,-227]))
+    barpaddings = list(reversed([60,-7,3,-79,-121,-105,-107,-103,-113,-142,-144,-155,-159,-170,-155,-168,-181,-195,-208,-208]))
     for index, bar_label in enumerate(barlabels):
         bar_label.set_x(bar_label.get_position()[1] - 200 + barpaddings[index])
     for i, text in enumerate(axs["Top"].texts):
@@ -436,11 +436,17 @@ if plotFig4:
 if plotFig5:
 
     fig, axis = plt.subplots(3,1, figsize=(12,6), layout="tight")
-    _, bins, patches = axis[0].hist(model_data["percent_loss_by_region"]["Northern America"], bins=100, density=True)
+    _, bins, patches = axis[0].hist(model_data["percent_loss_by_region"]["Northern America"], bins=200, density=True)
     sns.kdeplot(model_data["percent_loss_by_region"]["Northern America"], ax=axis[0], color="black")
 
     mean = np.mean(model_data["percent_loss_by_region"]["Northern America"])
     std = np.std(model_data["percent_loss_by_region"]["Northern America"])
+
+    print("North America")
+    print("Mean:", mean)
+    print("Upper bound:", mean + std)
+    print("Lower bound:", mean-std)
+    print("Percent samples below 0:", len([val for val in model_data["percent_loss_by_region"]["Northern America"] if val < 0])/len(model_data["percent_loss_by_region"]["Northern America"]))
 
     axis[0].axvline(mean, color = "yellow", linewidth=4)
     axis[0].axvline(mean - std, color = "orange", linewidth=4)
@@ -449,14 +455,20 @@ if plotFig5:
     for index, bin in enumerate(bins):
         if index != len(bins)-1:
             if bin < mean - std or bin > mean + std:
-                patches[index].set_facecolor("gray")
+                patches[index-1].set_facecolor("gray")
             else:
-                patches[index].set_facecolor("blue")
+                patches[index-1].set_facecolor("blue")
 
     mean = np.mean(model_data["percent_loss_by_region"]["Eastern Africa"])
     std = np.std(model_data["percent_loss_by_region"]["Eastern Africa"])
 
-    _, bins, patches = axis[1].hist(model_data["percent_loss_by_region"]["Eastern Africa"], bins=100, density=True)
+    print("Eastern Africa")
+    print("Mean:", mean)
+    print("Upper bound:", mean + std)
+    print("Lower bound:", mean-std)
+    print("Percent samples below 0:", len([val for val in model_data["percent_loss_by_region"]["Eastern Africa"] if val < 0])/len(model_data["percent_loss_by_region"]["Eastern Africa"]))
+
+    _, bins, patches = axis[1].hist(model_data["percent_loss_by_region"]["Eastern Africa"], bins=200, density=True)
     sns.kdeplot(model_data["percent_loss_by_region"]["Eastern Africa"], ax=axis[1], color="black")
     axis[1].axvline(mean, color = "yellow", linewidth=4)
     axis[1].axvline(mean - std, color = "orange", linewidth=4)
@@ -472,7 +484,13 @@ if plotFig5:
     mean = np.mean(model_data["percent_loss_by_region"]["Southern Asia"])
     std = np.std(model_data["percent_loss_by_region"]["Southern Asia"])
 
-    _, bins, patches = axis[2].hist(model_data["percent_loss_by_region"]["Southern Asia"], bins=100, density=True)
+    print("Southern Asia")
+    print("Mean:", mean)
+    print("Upper bound:", mean + std)
+    print("Lower bound:", mean-std)
+    print("Percent samples below 0:", len([val for val in model_data["percent_loss_by_region"]["Southern Asia"] if val < 0])/len(model_data["percent_loss_by_region"]["Southern Asia"]))
+
+    _, bins, patches = axis[2].hist(model_data["percent_loss_by_region"]["Southern Asia"], bins=200, density=True)
     sns.kdeplot(model_data["percent_loss_by_region"]["Southern Asia"], ax=axis[2], color="black")
     axis[2].axvline(mean, color = "yellow", linewidth=4)
     axis[2].axvline(mean - std, color = "orange", linewidth=4)
@@ -481,9 +499,9 @@ if plotFig5:
     for index, bin in enumerate(bins):
         if index != len(bins)-1:
             if bin < mean - std or bin > mean + std:
-                patches[index-1].set_facecolor("gray")
+                patches[index].set_facecolor("gray")
             else:
-                patches[index-1].set_facecolor("blue")
+                patches[index].set_facecolor("blue")
 
     axis[0].set_xlim([-50,50])
     axis[1].set_xlim([-50,50])
@@ -527,6 +545,11 @@ if plotSupFig1:
     plt.xlabel("% Global TFP Change due to Drought", size=15, weight="bold")
     plt.ylabel("Probability Density", size=15, weight="bold")
     plt.savefig("figures/drought_supfig1.png", bbox_inches='tight')
+
+    print("Percent samples below 0:", len([val for val in model_data["global_percent_loss"] if val < 0])/len(model_data["global_percent_loss"]))
+    print("Mean:", np.mean(model_data["global_percent_loss"]))
+    print("Q1:", q1)
+    print("Q2:", q2)
 
 # plot supplementary figure 2
 if plotSupFig2:
@@ -573,23 +596,32 @@ if plotSupFig2:
 # plot supplementary figure 3
 if plotSupFig3:
 
+    fig, axes = plt.subplots(2,1)
+
+    country_geopandas = geopandas.read_file(
+            geopandas.datasets.get_path('naturalearth_lowres')
+        )
+
     country_geopandas = country_geopandas.merge(
         data,
         how='inner', 
         left_on=['iso_a3'],
         right_on=['country']
     )
-    plot1 = country_geopandas.plot(column="global_ag_weights", cmap="coolwarm", ax=axes[0],  legend=True, legend_kwds={"location":"bottom","pad":.04})
-    plot1.figure.axes[-1].tick_params(labelsize=15)
-    plot2 = country_geopandas.plot(column="regional_ag_weights", cmap="coolwarm", ax=axes[1],  legend=True, legend_kwds={"location":"bottom","pad":.04})
-    plot2.figure.axes[-1].tick_params(labelsize=15)
+    plot1 = country_geopandas.plot(column="global_ag_weights", cmap="coolwarm", ax=axes[0],  legend=True, legend_kwds={"location":"bottom","pad":.04, "shrink": 0.6})
+    plot1.figure.axes[-1].tick_params(labelsize=10)
+    plot2 = country_geopandas.plot(column="regional_ag_weights", cmap="coolwarm", ax=axes[1],  legend=True, legend_kwds={"location":"bottom","pad":.04, "shrink": 0.6})
+    plot2.figure.axes[-1].tick_params(labelsize=10)
 
-    axes[0].set_title("% of Agricultural Revenue by Country (Global)", size=15, weight="bold")
-    axes[1].set_title("% of Agricultural Revenue by Country (Regional)", size=15, weight="bold")
+    axes[0].set_title("% of Agricultural Revenue by Country (Global)", size=10, weight="bold")
+    axes[1].set_title("% of Agricultural Revenue by Country (Regional)", size=10, weight="bold")
 
     axes[0].set_xticklabels([])
+    axes[0].set_yticklabels([])
+    axes[1].set_xticklabels([])
     axes[1].set_yticklabels([])
 
+    fig.tight_layout()
     plt.savefig("figures/drought_supfig3.png", bbox_inches='tight')
 
 # generate supplementary table 1
@@ -618,13 +650,13 @@ if genSupTab2:
 
 if genSupTab3:
 
-    ndvi_model = pd.read_pickle("output/models/bayes_models/ndvi_bayes_yfe_cre_for_drought_full/ndvi_bayes_yfe_cre_for_drought_full_10k_only_country_coefs.pkl")
+    ndvi_model = pd.read_pickle("output/models/bayes_models/ndvi_bayes_yfe_cre_for_drought_full/ndvi_bayes_yfe_cre_for_drought_full_with_intercept_temp_multiyear_drought_only_country_coefs.pkl")
     ndvi_data = pd.read_csv("data/regression/ndvi_regression_data.csv").dropna().reset_index(drop=True)
 
     # unscale ndvi country coefficients
     scaled_vars = {}
     unscaled_vars = {}
-    for country_index, var in enumerate(ndvi_model["var_list"]):
+    for country_index, var in enumerate(ndvi_model["var_list"][43:]):
         scaled_vars[var] = ndvi_model["posterior"][:,:,:,country_index].data.flatten()
     for var, samples in scaled_vars.items():
         unscaled_vars[var] = np.array(samples) * np.std(ndvi_data.fd_ln_ndvi)

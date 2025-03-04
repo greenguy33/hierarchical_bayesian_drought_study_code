@@ -27,7 +27,6 @@ def format_tfp_data(data, years, year_column_format, country_column, output_var)
 					formatted_outcome_var[country][year][output_var] = outcome
 	return formatted_outcome_var
 
-
 def format_ndvi_data(data, years, year_column, country_column, output_var):
 	data["ln_ndvi"] = np.log(data["ndvi"])
 	data[output_var] = data.groupby(country_column)["ln_ndvi"].diff()
@@ -41,7 +40,6 @@ def format_ndvi_data(data, years, year_column, country_column, output_var):
 				formatted_outcome_var[row[country_column]][row[year_column]] = {}
 			formatted_outcome_var[row[country_column]][row[year_column]][output_var] = row[output_var]
 	return formatted_outcome_var
-
 
 def add_climate_vars_to_dataset(dataset, climate_val, prev_climate_val, country, year, climate_var, weights):
 	dataset[country][year][f"{climate_var}_{weights}"] = climate_val
@@ -74,19 +72,6 @@ def write_regression_data_to_file(file, data, first_year):
 			for column in data:
 				new_row.append(data[column])
 			writer.writerow(new_row)
-
-def find_closest_to_value_in_list(list_of_values, value_to_position, ):
-	position = bisect_left(list_of_values, value_to_position)
-	if position == 0:
-		return position
-	if position == len(list_of_values):
-		return -1
-	before = list_of_values[position - 1]
-	after = list_of_values[position]
-	if after - value_to_position < value_to_position - before:
-		return position
-	else:
-		return position - 1
 	
 def add_natural_disasters_to_dataset(dataset, extracted_disasters, countries_with_natural_disaster_data):
 	disaster_combinations = list(it.combinations(disaster_types_to_extract, 2))
@@ -161,12 +146,17 @@ for row in natural_disasters_data.iterrows():
 		disaster = disaster_subtype
 	if disaster != None:
 		country = row.ISO
-		year = int(row["DisNo."].split("-")[0])
 		if country not in extracted_disasters:
 			extracted_disasters[country] = {}
-		if year not in extracted_disasters[country]:
-			extracted_disasters[country][year] = {}
-		extracted_disasters[country][year][disaster] = 1
+		if row["Start Year"] == row["End Year"]:
+			if row["Start Year"] not in extracted_disasters[country]:
+				extracted_disasters[country][row["Start Year"]] = {}
+			extracted_disasters[country][row["Start Year"]][disaster] = 1
+		else:
+			for year in range(row["Start Year"], row["End Year"]):
+				if year not in extracted_disasters[country]:
+					extracted_disasters[country][year] = {}
+				extracted_disasters[country][year][disaster] = 1
 
 formatted_tfp_data = add_natural_disasters_to_dataset(formatted_tfp_data, extracted_disasters, countries_with_natural_disaster_data)
 formatted_ndvi_data = add_natural_disasters_to_dataset(formatted_ndvi_data, extracted_disasters, countries_with_natural_disaster_data)

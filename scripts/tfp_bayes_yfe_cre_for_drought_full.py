@@ -100,10 +100,10 @@ with pm.Model() as pymc_model:
     tfp_posterior = pm.Normal('tfp_posterior', mu=tfp_prior, sigma=tfp_std, observed=target_data)
 
     prior = pm.sample_prior_predictive()
-    trace = pm.sample(target_accept=.99, cores=4, tune=5000, draws=5000)
+    trace = pm.sample(target_accept=.99, cores=4, tune=1000, draws=1000)
     posterior = pm.sample_posterior_predictive(trace, extend_inferencedata=True)
 
-with open ('output/models/bayes_models/tfp_bayes_yfe_cre_for_drought_full_10k.pkl', 'wb') as buff:
+with open ('output/models/bayes_models/tfp_bayes_yfe_cre_for_drought_full.pkl', 'wb') as buff:
     pkl.dump({
         "prior":prior,
         "trace":trace,
